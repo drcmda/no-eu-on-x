@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 300px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #15202b;
+    color: #e7e9ea;
+    padding: 16px;
+  }
+  h1 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #f7f9f9;
+  }
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .toggle-label { font-size: 14px; }
+  .switch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+  }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute;
+    inset: 0;
+    background: #536471;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .slider::before {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    bottom: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.2s;
+  }
+  input:checked + .slider { background: #1d9bf0; }
+  input:checked + .slider::before { transform: translateX(20px); }
+  .stats {
+    font-size: 13px;
+    color: #8b98a5;
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+  .stats strong { color: #e7e9ea; }
+
+  .section-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #8b98a5;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .section-label .bulk-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .section-label .bulk-actions a {
+    color: #1d9bf0;
+    cursor: pointer;
+    font-weight: 400;
+    text-decoration: none;
+    font-size: 12px;
+  }
+  .section-label .bulk-actions a:hover { text-decoration: underline; }
+
+  .country-list {
+    max-height: 240px;
+    overflow-y: auto;
+    border: 1px solid #38444d;
+    border-radius: 8px;
+    padding: 4px 0;
+    margin-bottom: 12px;
+  }
+  .country-list::-webkit-scrollbar { width: 6px; }
+  .country-list::-webkit-scrollbar-track { background: transparent; }
+  .country-list::-webkit-scrollbar-thumb { background: #38444d; border-radius: 3px; }
+
+  .country-item {
+    display: flex;
+    align-items: center;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.1s;
+  }
+  .country-item:hover { background: rgba(239,243,244,0.05); }
+  .country-item input[type="checkbox"] {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #536471;
+    border-radius: 3px;
+    margin-right: 10px;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .country-item input[type="checkbox"]:checked {
+    background: #1d9bf0;
+    border-color: #1d9bf0;
+  }
+  .country-item input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    left: 3px;
+    top: 0px;
+    width: 5px;
+    height: 9px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .username-section { margin-bottom: 12px; }
+  .username-input-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .username-input-row input {
+    flex: 1;
+    background: #1e2d3d;
+    border: 1px solid #38444d;
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: #e7e9ea;
+    font-size: 13px;
+    outline: none;
+  }
+  .username-input-row input::placeholder { color: #536471; }
+  .username-input-row input:focus { border-color: #1d9bf0; }
+  .username-input-row button {
+    background: #1d9bf0;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 13px;
+    padding: 6px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .username-input-row button:hover { background: #1a8cd8; }
+  .username-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-height: 120px;
+    overflow-y: auto;
+  }
+  .username-tags::-webkit-scrollbar { width: 4px; }
+  .username-tags::-webkit-scrollbar-thumb { background: #38444d; border-radius: 2px; }
+  .username-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #1e2d3d;
+    border: 1px solid #38444d;
+    border-radius: 14px;
+    padding: 3px 8px 3px 10px;
+    font-size: 12px;
+    color: #e7e9ea;
+    max-width: 100%;
+  }
+  .username-tag span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .username-tag .remove {
+    cursor: pointer;
+    color: #8b98a5;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0 2px;
+    flex-shrink: 0;
+  }
+  .username-tag .remove:hover { color: #e0245e; }
+  .username-empty {
+    font-size: 12px;
+    color: #536471;
+    font-style: italic;
+  }
+
+  .btn {
+    margin-top: 4px;
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #536471;
+    border-radius: 20px;
+    background: transparent;
+    color: #e7e9ea;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .btn:hover { background: rgba(239,243,244,0.1); }
+</style>
+</head>
+<body>
+  <h1>No EU on X</h1>
+
+  <div class="toggle-row">
+    <span class="toggle-label">Filter enabled</span>
+    <label class="switch">
+      <input type="checkbox" id="toggle" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="toggle-row">
+    <span class="toggle-label">Exclude people I follow</span>
+    <label class="switch">
+      <input type="checkbox" id="excludeFollowing" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="stats">
+    Accounts checked: <strong id="checked">0</strong><br>
+    Posts filtered: <strong id="filtered">0</strong>
+  </div>
+
+  <div class="section-label">
+    <span>Blocked countries / regions</span>
+    <span class="bulk-actions">
+      <a id="selectAll">All</a>
+      <a id="selectNone">None</a>
+    </span>
+  </div>
+  <div class="country-list" id="countryList"></div>
+
+  <div class="section-label" style="margin-top: 4px;">
+    <span>Custom countries / regions</span>
+  </div>
+  <div class="username-section">
+    <div class="username-input-row">
+      <input type="text" id="customCountryInput" placeholder="e.g. Switzerland, United Kingdom">
+      <button id="addCustomCountry">Add</button>
+    </div>
+    <div class="username-tags" id="customCountryTags">
+      <span class="username-empty">None added</span>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top: 4px;">
+    <span>Blocked usernames</span>
+  </div>
+  <div class="username-section">
+    <div class="username-input-row">
+      <input type="text" id="usernameInput" placeholder="@handle or display name">
+      <button id="addUsername">Add</button>
+    </div>
+    <div class="username-tags" id="usernameTags">
+      <span class="username-empty">No usernames blocked</span>
+    </div>
+  </div>
+
+  <button class="btn" id="clear">Clear cache &amp; reset</button>
+  <script src="popup.js"></script>
+</body>
+</html>
