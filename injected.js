@@ -51,10 +51,18 @@ window.fetch = async function (...args) {
 };
 
 const knownFollowing = new Set();
+let selfScreenName = null;
 
 function harvestUsers(obj, depth) {
   if (depth === undefined) depth = 0;
   if (!obj || typeof obj !== "object" || depth > 20) return;
+
+  // Detect logged-in user (viewer) from API responses
+  if (!selfScreenName && obj.viewer && obj.viewer.screen_name) {
+    selfScreenName = obj.viewer.screen_name.toLowerCase();
+    log("Detected self (viewer):", selfScreenName);
+    window.postMessage({ type: "noeu_self", username: selfScreenName }, "*");
+  }
 
   // Harvest follow status from timeline user objects
   if (obj.legacy && obj.legacy.screen_name) {
@@ -257,5 +265,26 @@ async function fetchAboutAccount(username) {
     return { country: null };
   }
 }
+
+// Detect logged-in user from profile nav link (fallback)
+function detectSelfFromDOM() {
+  if (selfScreenName) return;
+  const profileLink = document.querySelector('[data-testid="AppTabBar_Profile_Link"]');
+  if (profileLink) {
+    const href = profileLink.getAttribute("href");
+    const m = href?.match(/^\/([A-Za-z0-9_]{1,15})$/);
+    if (m) {
+      selfScreenName = m[1].toLowerCase();
+      log("Detected self (DOM):", selfScreenName);
+      window.postMessage({ type: "noeu_self", username: selfScreenName }, "*");
+    }
+  }
+}
+// Try immediately and retry until found
+detectSelfFromDOM();
+const selfInterval = setInterval(() => {
+  detectSelfFromDOM();
+  if (selfScreenName) clearInterval(selfInterval);
+}, 2000);
 
 log("injected.js loaded — passive interception active");

@@ -62,6 +62,8 @@ let customCountries = new Set();
 // Users we follow — harvested passively from X's timeline responses
 const followedUsers = new Set();
 let excludeFollowing = true; // default: don't filter people you follow
+// Logged-in user — never filter your own posts
+let selfUsername = null;
 let stats = { filtered: 0, checked: 0 };
 
 // Load persisted state on startup
@@ -181,6 +183,9 @@ window.addEventListener("message", (event) => {
   if (event.data?.type === "noeu_following") {
     followedUsers.add(event.data.username);
   }
+  if (event.data?.type === "noeu_self" && !selfUsername) {
+    selfUsername = event.data.username;
+  }
 });
 
 // Request a user lookup via injected.js (runs in page context with full auth)
@@ -248,6 +253,12 @@ async function processTweet(article) {
 
   const username = getUsernameFromTweet(article);
   if (!username) return;
+
+  // Never filter the logged-in user's own posts
+  if (selfUsername && username.toLowerCase() === selfUsername) {
+    toggleHide(article, false);
+    return;
+  }
 
   // Skip people we follow (if option enabled)
   if (excludeFollowing && followedUsers.has(username.toLowerCase())) {
