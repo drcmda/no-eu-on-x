@@ -20,6 +20,7 @@ const usernameInput = document.getElementById("usernameInput");
 const addUsernameBtn = document.getElementById("addUsername");
 const usernameTagsEl = document.getElementById("usernameTags");
 const excludeFollowingEl = document.getElementById("excludeFollowing");
+const excludeOwnRepliesEl = document.getElementById("excludeOwnReplies");
 const customCountryInput = document.getElementById("customCountryInput");
 const addCustomCountryBtn = document.getElementById("addCustomCountry");
 const customCountryTagsEl = document.getElementById("customCountryTags");
@@ -185,9 +186,10 @@ customCountryInput.addEventListener("keydown", (e) => {
 
 // --- Load state ---
 
-chrome.storage.local.get(["enabled", "blockedCountries", "blockedUsernames", "excludeFollowing", "customCountries"], (data) => {
+chrome.storage.local.get(["enabled", "blockedCountries", "blockedUsernames", "excludeFollowing", "excludeOwnReplies", "customCountries"], (data) => {
   toggle.checked = data.enabled !== false;
   excludeFollowingEl.checked = data.excludeFollowing !== false;
+  excludeOwnRepliesEl.checked = data.excludeOwnReplies !== false;
   if (data.blockedCountries) {
     blockedSet = new Set(data.blockedCountries);
   }
@@ -218,6 +220,10 @@ toggle.addEventListener("change", () => {
 
 excludeFollowingEl.addEventListener("change", () => {
   chrome.storage.local.set({ excludeFollowing: excludeFollowingEl.checked });
+});
+
+excludeOwnRepliesEl.addEventListener("change", () => {
+  chrome.storage.local.set({ excludeOwnReplies: excludeOwnRepliesEl.checked });
 });
 
 selectAllBtn.addEventListener("click", () => setAll(true));

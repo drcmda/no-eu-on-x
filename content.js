@@ -64,10 +64,11 @@ const followedUsers = new Set();
 let excludeFollowing = true; // default: don't filter people you follow
 // Logged-in user — never filter your own posts
 let selfUsername = null;
+let excludeOwnReplies = true; // default: don't filter replies to your own posts
 let stats = { filtered: 0, checked: 0 };
 
 // Load persisted state on startup
-chrome.storage.local.get(["euCache", "enabled", "stats", "blockedCountries", "blockedUsernames", "excludeFollowing", "customCountries"], (data) => {
+chrome.storage.local.get(["euCache", "enabled", "stats", "blockedCountries", "blockedUsernames", "excludeFollowing", "excludeOwnReplies", "customCountries"], (data) => {
   if (data.euCache) {
     for (const [k, v] of Object.entries(data.euCache)) {
       cache.set(k, v);
@@ -82,6 +83,7 @@ chrome.storage.local.get(["euCache", "enabled", "stats", "blockedCountries", "bl
     blockedUsernames = new Set(data.blockedUsernames);
   }
   if (data.excludeFollowing !== undefined) excludeFollowing = data.excludeFollowing;
+  if (data.excludeOwnReplies !== undefined) excludeOwnReplies = data.excludeOwnReplies;
   if (data.customCountries) customCountries = new Set(data.customCountries);
 });
 
@@ -105,6 +107,10 @@ chrome.storage.onChanged.addListener((changes) => {
   }
   if (changes.excludeFollowing) {
     excludeFollowing = changes.excludeFollowing.newValue;
+    rescanAll();
+  }
+  if (changes.excludeOwnReplies) {
+    excludeOwnReplies = changes.excludeOwnReplies.newValue;
     rescanAll();
   }
   if (changes.customCountries) {
@@ -145,6 +151,26 @@ function getDisplayNameText(article) {
   };
   walk(link);
   return text.trim().toLowerCase();
+}
+
+function isReplyToSelf(article) {
+  if (!selfUsername) return false;
+  // Check "Replying to @username" links inside the article
+  const replyLinks = article.querySelectorAll('a[href^="/"]');
+  for (const link of replyLinks) {
+    // X shows "Replying to @handle" with a link to the user's profile
+    const parent = link.closest('[id^="id__"]');
+    if (parent && parent.textContent.includes("Replying to")) {
+      const href = link.getAttribute("href");
+      if (href === `/${selfUsername}` || href?.toLowerCase() === `/${selfUsername}`) {
+        return true;
+      }
+    }
+  }
+  // Also check if we're on the user's own status page (thread view)
+  const path = window.location.pathname.toLowerCase();
+  if (path.startsWith(`/${selfUsername}/status/`)) return true;
+  return false;
 }
 
 function isUsernameBlocked(username, article) {
@@ -256,6 +282,12 @@ async function processTweet(article) {
 
   // Never filter the logged-in user's own posts
   if (selfUsername && username.toLowerCase() === selfUsername) {
+    toggleHide(article, false);
+    return;
+  }
+
+  // Skip replies to the logged-in user's own posts
+  if (excludeOwnReplies && isReplyToSelf(article)) {
     toggleHide(article, false);
     return;
   }
