@@ -9,7 +9,7 @@ A Brave/Chrome extension that filters posts from EU-based accounts on X (Twitter
 - **Custom countries** — Add any additional country or region to the blocklist (e.g. Switzerland, United Kingdom)
 - **Username blocklist** — Block specific users by (partial) @handle or display name (supports emoji matching)
 - **Exclude people you follow** — People you follow are never filtered (on by default, can be toggled off)
-- **Persistent cache** — Lookups are cached for 24 hours to minimize API calls
+- **Persistent cache** — Lookups are cached for one week to minimize API calls
 - **Rate limit handling** — Automatic backoff and retry when X's API rate limits are hit
 
 ## How it works

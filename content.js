@@ -48,7 +48,7 @@ const EU_COUNTRY_LIST = [
 
 // In-memory cache: username -> { country: string|null, ts: number }
 const cache = new Map();
-const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours
+const CACHE_TTL = 1000 * 60 * 60 * 24 * 7; // 7 days for successful lookups
 const CACHE_TTL_UNKNOWN = 1000 * 60 * 5; // 5 min for failed/unknown lookups
 const pendingLookups = new Map();
 
