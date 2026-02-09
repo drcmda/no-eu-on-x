@@ -23,12 +23,3 @@ The extension uses X's internal `AboutAccountQuery` GraphQL endpoint — the sam
 3. Enable **Developer mode** (toggle in the top right)
 4. Click **Load unpacked** and select the `no-eu` folder
 5. Navigate to [x.com](https://x.com) — the extension activates automatically
-
-## Popup controls
-
-- **Filter enabled** — Master on/off toggle
-- **Exclude people I follow** — Skip filtering for accounts you follow
-- **Blocked countries / regions** — Checkboxes for each EU country + Europe region
-- **Custom countries / regions** — Add non-EU countries to filter
-- **Blocked usernames** — Block by @handle, display name, or emoji
-- **Clear cache & reset** — Wipe cached lookups and recheck all visible posts
